@@ -171,9 +171,4 @@ small, Metabase's first administrator is configured through its normal setup
 wizard, and the project does not claim enterprise RBAC or large-scale performance
 benchmarking.
 
-## Attribution
 
-This repository is based on the Self-Serve Analytics Platform project described
-in Abhishek Singh's `project_OmniFlow` portfolio. The upstream portfolio is
-MIT-licensed; its copyright and permission notice are preserved in `LICENSE`.
-See `NOTICE.md` for the modifications represented by this version.
