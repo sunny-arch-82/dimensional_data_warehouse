@@ -1,0 +1,53 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.hypothesis/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# dbt generated artifacts
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+
+# Local warehouse/runtime data
+*.db
+*.db.tmp
+*.duckdb
+*.sqlite
+*.sqlite3
+
+# Reconciliation/runtime reports
+reports/*.csv
+reports/*.json
+!reports/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# IDE / local automation
+.vscode/
+.idea/
+.kiro/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

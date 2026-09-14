@@ -1,0 +1,109 @@
+x-dagster-env: &dagster-env
+  POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+  POSTGRES_DB: ${POSTGRES_DB:-analytics}
+  POSTGRES_USER: ${POSTGRES_USER:-analytics}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-analytics_local_only}
+  DAGSTER_HOME: ${DAGSTER_HOME:-/opt/dagster/dagster_home}
+  DBT_PROFILES_DIR: ${DBT_PROFILES_DIR:-/opt/dagster/app/dbt_project}
+  CUBE_API_SECRET: ${CUBE_API_SECRET:-local_dev_cube_secret_change_me}
+  CUBE_API_URL: ${CUBE_API_URL:-http://cube:4000}
+  CUBE_SQL_HOST: ${CUBE_SQL_HOST:-cube}
+  CUBE_SQL_PORT: ${CUBE_SQL_PORT:-15432}
+  CUBE_SQL_DATABASE: ${CUBE_SQL_DATABASE:-cube}
+  CUBE_SQL_USER: ${CUBE_SQL_USER:-analytics_bi}
+  CUBE_SQL_PASSWORD: ${CUBE_SQL_PASSWORD:-analytics_bi_local_only}
+  METRIC_RECONCILIATION_TOLERANCE: ${METRIC_RECONCILIATION_TOLERANCE:-0.01}
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-analytics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-analytics_local_only}
+      POSTGRES_DB: ${POSTGRES_DB:-analytics}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-analytics} -d ${POSTGRES_DB:-analytics}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  dagster-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.dagster
+    image: governed-analytics/dagster
+    entrypoint: ["python", "scripts/validate_env.py"]
+    command: ["dagster-webserver", "-h", "0.0.0.0", "-p", "3000", "-w", "workspace.yaml"]
+    ports:
+      - "3000:3000"
+    environment:
+      <<: *dagster-env
+    volumes:
+      - dagster_home:/opt/dagster/dagster_home
+      - ./dagster_project/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml:ro
+      - .:/opt/dagster/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dagster-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile.dagster
+    image: governed-analytics/dagster
+    entrypoint: ["python", "scripts/validate_env.py"]
+    command: ["dagster-daemon", "run"]
+    environment:
+      <<: *dagster-env
+    volumes:
+      - dagster_home:/opt/dagster/dagster_home
+      - ./dagster_project/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml:ro
+      - .:/opt/dagster/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  cube:
+    image: cubejs/cube:latest
+    ports:
+      - "4000:4000"
+      - "15432:15432"
+    environment:
+      CUBEJS_DEV_MODE: "true"
+      CUBEJS_API_SECRET: ${CUBE_API_SECRET:-local_dev_cube_secret_change_me}
+      CUBEJS_DB_TYPE: postgres
+      CUBEJS_DB_HOST: ${POSTGRES_HOST:-postgres}
+      CUBEJS_DB_PORT: ${POSTGRES_PORT:-5432}
+      CUBEJS_DB_NAME: ${POSTGRES_DB:-analytics}
+      CUBEJS_DB_USER: ${POSTGRES_USER:-analytics}
+      CUBEJS_DB_PASS: ${POSTGRES_PASSWORD:-analytics_local_only}
+      CUBEJS_PG_SQL_PORT: ${CUBE_SQL_PORT:-15432}
+      CUBEJS_SQL_USER: ${CUBE_SQL_USER:-analytics_bi}
+      CUBEJS_SQL_PASSWORD: ${CUBE_SQL_PASSWORD:-analytics_bi_local_only}
+    volumes:
+      - ./cube:/cube/conf
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3001:3000"
+    volumes:
+      - metabase_data:/metabase-data
+    environment:
+      MB_DB_TYPE: h2
+      MB_DB_FILE: /metabase-data/metabase.db
+    depends_on:
+      - cube
+
+volumes:
+  postgres_data:
+  dagster_home:
+  metabase_data:

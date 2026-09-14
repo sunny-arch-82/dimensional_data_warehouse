@@ -1,0 +1,33 @@
+name: governed_analytics
+version: "1.0.0"
+config-version: 2
+
+profile: governed_analytics
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+seeds:
+  governed_analytics:
+    marketing:
+      +schema: raw_marketing
+      +quote_columns: false
+    finance:
+      +schema: raw_finance
+      +quote_columns: false
+
+models:
+  governed_analytics:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: marts

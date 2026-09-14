@@ -1,0 +1,6 @@
+customer_id,first_seen_date,segment
+CUST-001,2023-06-15,enterprise
+CUST-002,2023-09-01,smb
+CUST-003,2024-01-10,smb
+CUST-004,2023-11-20,enterprise
+CUST-005,2024-02-28,startup

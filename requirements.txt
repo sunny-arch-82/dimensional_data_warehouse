@@ -1,0 +1,10 @@
+dagster>=1.8,<2
+dagster-webserver>=1.8,<2
+dbt-core>=1.8,<2
+dbt-postgres>=1.8,<2
+psycopg2-binary>=2.9,<3
+PyJWT>=2.8,<3
+PyYAML>=6,<7
+requests>=2.31,<3
+hypothesis>=6,<7
+pytest>=8,<9

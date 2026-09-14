@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: Clean order records used by dimensional models.
+    columns:
+      - name: order_id
+        tests: [not_null, unique]
+      - name: customer_id
+        tests: [not_null]
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['completed', 'refunded', 'pending', 'cancelled']
+
+  - name: stg_customers
+    description: Clean customer records.
+    columns:
+      - name: customer_id
+        tests: [not_null, unique]
+
+  - name: fct_orders
+    description: Order fact table at one row per order.
+    columns:
+      - name: order_id
+        tests: [not_null, unique]
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+
+  - name: dim_customers
+    description: Customer dimension enriched with lifetime order behavior.
+    columns:
+      - name: customer_id
+        tests: [not_null, unique]
+
+  - name: fct_invoices
+    description: Invoice fact table at one row per invoice.
+    columns:
+      - name: invoice_id
+        tests: [not_null, unique]
+
+  - name: dim_campaigns
+    description: Marketing campaign dimension.
+    columns:
+      - name: campaign_id
+        tests: [not_null, unique]
+
+  - name: metric_snapshot
+    description: Governed KPI snapshot used as the warehouse source of truth for semantic and BI layers.
+    columns:
+      - name: metric_as_of_date
+        tests: [not_null]
+      - name: gross_revenue
+        tests: [not_null]
+      - name: net_revenue
+        tests: [not_null]
+      - name: active_customers
+        tests: [not_null]
+      - name: average_order_value
+        tests: [not_null]
+      - name: refund_rate
+        tests: [not_null]

@@ -1,0 +1,55 @@
+metric_set: governed_commerce_kpis
+metric_set_version: "1.0.0"
+owner: analytics_engineering
+source_model: marts.metric_snapshot
+
+metrics:
+  gross_revenue:
+    version: "v1"
+    status: active
+    description: Revenue from completed and refunded transactions before refunds are subtracted.
+    warehouse_column: gross_revenue
+    cube_member: Metrics.gross_revenue
+    bi_label: Gross Revenue
+    unit: USD
+    tolerance: 0.01
+
+  net_revenue:
+    version: "v1"
+    status: active
+    description: Revenue retained from completed orders after excluding refunded transactions.
+    warehouse_column: net_revenue
+    cube_member: Metrics.net_revenue
+    bi_label: Net Revenue
+    unit: USD
+    tolerance: 0.01
+
+  active_customers:
+    version: "v1"
+    status: active
+    description: Distinct customers with at least one completed or refunded transaction.
+    warehouse_column: active_customers
+    cube_member: Metrics.active_customers
+    bi_label: Active Customers
+    unit: count
+    tolerance: 0
+
+  average_order_value:
+    version: "v1"
+    status: active
+    description: Gross revenue divided by completed or refunded transactions.
+    warehouse_column: average_order_value
+    cube_member: Metrics.average_order_value
+    bi_label: Average Order Value
+    unit: USD
+    tolerance: 0.01
+
+  refund_rate:
+    version: "v1"
+    status: active
+    description: Refunded transactions divided by all completed or refunded transactions, expressed as a percentage.
+    warehouse_column: refund_rate
+    cube_member: Metrics.refund_rate
+    bi_label: Refund Rate
+    unit: percent
+    tolerance: 0.01
